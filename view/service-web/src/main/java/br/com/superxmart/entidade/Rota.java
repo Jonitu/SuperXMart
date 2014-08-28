@@ -1,12 +1,21 @@
 package br.com.superxmart.entidade;
 
-public class Rota extends Entidade{
-	
+public class Rota extends Entidade {
+
 	private String origem;
-	
+
 	private String destino;
-	
+
 	private Integer distancia;
+
+	public Rota() {
+	}
+
+	public Rota(String origem, String destino, Integer distancia) {
+		this.origem = origem;
+		this.destino = destino;
+		this.distancia = distancia;
+	}
 
 	public String getOrigem() {
 		return origem;
@@ -31,6 +40,10 @@ public class Rota extends Entidade{
 	public void setDistancia(Integer distancia) {
 		this.distancia = distancia;
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return "Rota [origem=" + origem + ", destino=" + destino + ", distancia=" + distancia + "]";
+	}
+
 }
