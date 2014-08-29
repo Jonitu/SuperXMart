@@ -3,10 +3,22 @@ package br.com.superxmart.entidade;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Mapa extends Entidade{
-	
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
+@Entity
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "nome" }) })
+public class Mapa extends Entidade {
+
+	@Column(nullable = false, length = 200)
 	private String nome;
-	
+
+	@OneToMany(mappedBy = "mapa", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private List<Rota> rotas = new ArrayList<Rota>();
 
 	public String getNome() {
@@ -28,7 +40,5 @@ public class Mapa extends Entidade{
 	public void addRota(Rota rota) {
 		rotas.add(rota);
 	}
-	
-	
 
 }

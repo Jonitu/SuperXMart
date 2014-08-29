@@ -1,12 +1,28 @@
 package br.com.superxmart.entidade;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.xml.bind.annotation.XmlTransient;
+
+@Entity
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "origem", "destino", "mapa_id" }) })
 public class Rota extends Entidade {
 
+	@Column(length = 200, nullable = false)
 	private String origem;
 
+	@Column(length = 200, nullable = false)
 	private String destino;
 
+	@Column(nullable = false)
 	private Integer distancia;
+
+	@ManyToOne(optional = false)
+	@XmlTransient
+	private Mapa mapa;
 
 	public Rota() {
 	}
@@ -44,6 +60,15 @@ public class Rota extends Entidade {
 	@Override
 	public String toString() {
 		return "Rota [origem=" + origem + ", destino=" + destino + ", distancia=" + distancia + "]";
+	}
+
+	@XmlTransient
+	public Mapa getMapa() {
+		return mapa;
+	}
+
+	public void setMapa(Mapa mapa) {
+		this.mapa = mapa;
 	}
 
 }
