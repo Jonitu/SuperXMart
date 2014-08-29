@@ -1,42 +1,30 @@
 package br.com.superxmart.business;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.MessageFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.superxmart.dto.PesquisaRotaDTO;
 import br.com.superxmart.entidade.Mapa;
 import br.com.superxmart.entidade.Rota;
 
 public class MelhorRota {
-	private static final String ESPACO = " ";
 	private List<List<Rota>> rotasEncontradas;
-	private String nomeMapa;
-	private String origem;
-	private String destino;
-	private Integer autonomia;
-	private BigDecimal valorCombustivel;
 
-	private NumberFormat DECIMAL_FORMAT = new DecimalFormat("0.00");
+	private PesquisaRotaDTO pesquisaRotaDTO;
+	private Mapa mapa;
 
-	public static void main(String[] args) {
-		new MelhorRota().testar("SP", "A", "D", 10, new BigDecimal("2.509"));
+	public MelhorRota(PesquisaRotaDTO pesquisaRotaDTO, Mapa mapa) {
+		this.pesquisaRotaDTO = pesquisaRotaDTO;
+		this.mapa = mapa;
 	}
 
-	private void testar(String nomeMapa, String origem, String destino, Integer autonomia, BigDecimal valorCombustivel) {
-		this.nomeMapa = nomeMapa;
-		this.origem = origem;
-		this.destino = destino;
-		this.autonomia = autonomia;
-		this.valorCombustivel = valorCombustivel;
+	public List<Rota> testar() {
 		rotasEncontradas = new ArrayList<List<Rota>>();
-		Mapa mapa = getMapa(nomeMapa);
 
 		List<Rota> rotas = mapa.getRotas();
 
-		extracted(null, origem, destino, rotas);
+		extracted(null, pesquisaRotaDTO.getOrigem(), pesquisaRotaDTO.getDestino(), rotas);
 
 		List<Rota> melhorRota = null;
 
@@ -47,12 +35,9 @@ public class MelhorRota {
 			Integer distancia = 0;
 			for (Rota rota : list) {
 				distancia += rota.getDistancia();
-				System.out.print(rota.getOrigem() + ESPACO);
 				if (index == list.size()) {
-					System.out.println(rota.getDestino());
-					if (rota.getDestino().equalsIgnoreCase(this.destino)) {
-						if (menorRota == null || distancia < menorRota
-								|| (distancia == menorRota && list.size() < melhorRota.size())) {
+					if (rota.getDestino().equalsIgnoreCase(this.pesquisaRotaDTO.getDestino())) {
+						if (menorRota == null || distancia < menorRota || (distancia == menorRota && list.size() < melhorRota.size())) {
 							menorRota = distancia;
 							melhorRota = list;
 						}
@@ -62,23 +47,11 @@ public class MelhorRota {
 			}
 		}
 
-		StringBuilder sb = new StringBuilder();
-		for (int index = 0; index < melhorRota.size(); index++) {
-			Rota rota = melhorRota.get(index);
-			sb.append(rota.getOrigem());
-			sb.append(ESPACO);
-			if (index + 1 == melhorRota.size()) {
-				sb.append(rota.getDestino());
-				sb.append(ESPACO);
-			}
-		}
+		BigDecimal consumoEstimado = new BigDecimal(menorRota).divide(new BigDecimal(pesquisaRotaDTO.getAutonomiaVeiculo()));
 
-		BigDecimal consumoEstimado = new BigDecimal(menorRota).divide(new BigDecimal(autonomia));
+		BigDecimal valor = consumoEstimado.multiply(pesquisaRotaDTO.getValorLitroCombustivel());
 
-		BigDecimal valor = consumoEstimado.multiply(valorCombustivel);
-
-		System.out.println(MessageFormat.format("Rota {0}com custo de {1}.", sb.toString(),
-				DECIMAL_FORMAT.format(valor)));
+		return melhorRota;
 	}
 
 	private void extracted(List<Rota> rotaEncontrada, String origem, String destino, List<Rota> rotas) {
@@ -119,26 +92,11 @@ public class MelhorRota {
 				extracted(novaRota, rota.getDestino(), destino, rotas);
 			}
 
-			if (!rotaEncontrada.isEmpty() && this.origem.equalsIgnoreCase(origem)) {
+			if (!rotaEncontrada.isEmpty() && pesquisaRotaDTO.getOrigem().equalsIgnoreCase(origem)) {
 				rotaEncontrada = new ArrayList<Rota>();
 				rotasEncontradas.add(rotaEncontrada);
 			}
 		}
 	}
 
-	private Mapa getMapa(String nomeMapa) {
-		Mapa mapa = new Mapa();
-		mapa.setNome(nomeMapa);
-
-		mapa.addRota(new Rota("A", "B", 10));
-		mapa.addRota(new Rota("B", "D", 15));
-		mapa.addRota(new Rota("A", "C", 20));
-		mapa.addRota(new Rota("C", "D", 1));
-		mapa.addRota(new Rota("B", "E", 50));
-		mapa.addRota(new Rota("D", "E", 30));
-
-		mapa.addRota(new Rota("B", "C", 1));
-
-		return mapa;
-	}
 }
