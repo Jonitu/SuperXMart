@@ -4,14 +4,27 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.superxmart.dto.MelhorRotaDTO;
 import br.com.superxmart.dto.PesquisaRotaDTO;
 import br.com.superxmart.entidade.Mapa;
 import br.com.superxmart.entidade.Rota;
 
+/**
+ * 
+ * @author Jonathas Lopes de Souza
+ * 
+ *         Classe responsavel por encontrar a melhor Rota
+ *
+ */
 public class MelhorRota {
-	private List<List<Rota>> rotasEncontradas;
+
+	/**
+	 * Lista de possiveis rotas encontradas a partir do ponto de origem
+	 */
+	private List<List<Rota>> rotasEncontradas = new ArrayList<List<Rota>>();
 
 	private PesquisaRotaDTO pesquisaRotaDTO;
+
 	private Mapa mapa;
 
 	public MelhorRota(PesquisaRotaDTO pesquisaRotaDTO, Mapa mapa) {
@@ -19,27 +32,25 @@ public class MelhorRota {
 		this.mapa = mapa;
 	}
 
-	public List<Rota> testar() {
-		rotasEncontradas = new ArrayList<List<Rota>>();
+	public MelhorRotaDTO encontrarMelhorRota() {
 
-		List<Rota> rotas = mapa.getRotas();
+		procurarRotas();
 
-		extracted(null, pesquisaRotaDTO.getOrigem(), pesquisaRotaDTO.getDestino(), rotas);
+		List<Rota> melhorRotaEncontrada = null;
 
-		List<Rota> melhorRota = null;
-
-		Integer menorRota = null;
+		Integer distanciaMenorRotaEncontrada = null;
 
 		for (List<Rota> list : rotasEncontradas) {
 			int index = 1;
-			Integer distancia = 0;
+			Integer distanciaDestaRota = 0;
 			for (Rota rota : list) {
-				distancia += rota.getDistancia();
+				distanciaDestaRota += rota.getDistancia();
 				if (index == list.size()) {
-					if (rota.getDestino().equalsIgnoreCase(this.pesquisaRotaDTO.getDestino())) {
-						if (menorRota == null || distancia < menorRota || (distancia == menorRota && list.size() < melhorRota.size())) {
-							menorRota = distancia;
-							melhorRota = list;
+					if (ehODestinoPesquisado(rota)) {
+						if (distanciaMenorRotaEncontrada == null || distanciaDestaRota < distanciaMenorRotaEncontrada
+								|| (distanciaDestaRota == distanciaMenorRotaEncontrada && list.size() < melhorRotaEncontrada.size())) {
+							distanciaMenorRotaEncontrada = distanciaDestaRota;
+							melhorRotaEncontrada = list;
 						}
 					}
 				}
@@ -47,56 +58,106 @@ public class MelhorRota {
 			}
 		}
 
-		BigDecimal consumoEstimado = new BigDecimal(menorRota).divide(new BigDecimal(pesquisaRotaDTO.getAutonomiaVeiculo()));
+		BigDecimal consumoEstimado = new BigDecimal(distanciaMenorRotaEncontrada).divide(new BigDecimal(pesquisaRotaDTO
+				.getAutonomiaVeiculo()));
 
-		BigDecimal valor = consumoEstimado.multiply(pesquisaRotaDTO.getValorLitroCombustivel());
+		BigDecimal custoEstimadoDaRota = consumoEstimado.multiply(pesquisaRotaDTO.getValorLitroCombustivel());
 
-		return melhorRota;
+		return new MelhorRotaDTO(melhorRotaEncontrada, custoEstimadoDaRota);
 	}
 
-	private void extracted(List<Rota> rotaEncontrada, String origem, String destino, List<Rota> rotas) {
-		if (rotaEncontrada == null) {
-			rotaEncontrada = new ArrayList<Rota>();
-			rotasEncontradas.add(rotaEncontrada);
+	private boolean ehODestinoPesquisado(Rota rota) {
+		return rota.getDestino().equalsIgnoreCase(this.pesquisaRotaDTO.getDestino());
+	}
+
+	/**
+	 * Responsavel por iniciar a pesquisa a partir do ponto de origem pesquisado
+	 */
+	private void procurarRotas() {
+		List<Rota> rotaInicial = new ArrayList<Rota>();
+		rotasEncontradas.add(rotaInicial);
+		procurarProximaRota(rotaInicial, pesquisaRotaDTO.getOrigem(), pesquisaRotaDTO.getDestino(), mapa.getRotas());
+	}
+
+	/**
+	 * Responsavel por procurar a rota baseada nos parametros. Caso somente
+	 * encontre origem, mas com o outro destino, entao recursivamente ele metodo
+	 * irah se chamando até que encontre o destino ou acabe as possibilidades
+	 * 
+	 * Este metodo encontra todos os caminhos baseado na origem, independente do
+	 * destino
+	 * 
+	 * @param rotaEncontrada
+	 * @param origem
+	 * @param destino
+	 * @param rotas
+	 */
+	private void procurarProximaRota(List<Rota> rotaEncontrada, String origem, String destino, List<Rota> rotas) {
+		// Valida se a origem jah passou por alguma rota, entao deve ser
+		// disconsiderado, para nao gear looping infinito de rotas
+		if (jaPassouPeloPontoComoOrigem(origem, rotaEncontrada)) {
+			return;
 		}
+
 		List<Rota> rotaEncontradaCopy = new ArrayList<Rota>(rotaEncontrada);
 
-		boolean encontrouRota = false;
+		// flag que controla se foi encontrada alguma rota para este looping.
+		// Isto eh necessario pois se encontrar mais de uma rota para o Loop,
+		// então deve se gerar uma nova lista de rotas
+		boolean encontradaRotaNesteLoop = false;
 
 		for (Rota rota : rotas) {
 
 			// Valida origem e destino com a rota
-			if (rota.getOrigem().equalsIgnoreCase(origem) && rota.getDestino().equalsIgnoreCase(destino)) {
-				System.out.println("Fim Origem/Destino Final: " + rota.getOrigem() + "/" + rota.getDestino());
-				if (encontrouRota) {
-					List<Rota> novaRota = new ArrayList<Rota>(rotaEncontradaCopy);
-					novaRota.add(rota);
+			if (saoIguais(rota.getOrigem(), origem) && saoIguais(rota.getDestino(), destino)) {
+				List<Rota> novaRota = rotaEncontrada;
+				if (encontradaRotaNesteLoop) {
+					new ArrayList<Rota>(rotaEncontradaCopy);
 					rotasEncontradas.add(novaRota);
-				} else {
-					rotaEncontrada.add(rota);
+				}
+				novaRota.add(rota);
+
+				encontradaRotaNesteLoop = true;
+
+				// Valida a origem com a origem da rota
+			} else if (saoIguais(rota.getOrigem(), origem)) {
+				List<Rota> novaRota = rotaEncontrada;
+				if (encontradaRotaNesteLoop) {
+					novaRota = new ArrayList<Rota>(rotaEncontradaCopy);
+					rotasEncontradas.add(novaRota);
 				}
 
-				encontrouRota = true;
-				// Valida a origem com a origem da rota
-			} else if (rota.getOrigem().equalsIgnoreCase(origem)) {
-				System.out.println("Inicio/Meio Origem/Destino: " + rota.getOrigem() + "/" + rota.getDestino());
-				List<Rota> novaRota = rotaEncontrada;
-				if (encontrouRota) {
-					novaRota = new ArrayList<Rota>(rotaEncontradaCopy);
-					novaRota.add(rota);
-					rotasEncontradas.add(novaRota);
-				} else {
-					novaRota.add(rota);
-				}
-				encontrouRota = true;
-				extracted(novaRota, rota.getDestino(), destino, rotas);
+				novaRota.add(rota);
+
+				encontradaRotaNesteLoop = true;
+				procurarProximaRota(novaRota, rota.getDestino(), destino, rotas);
 			}
 
-			if (!rotaEncontrada.isEmpty() && pesquisaRotaDTO.getOrigem().equalsIgnoreCase(origem)) {
+			if (!rotaEncontrada.isEmpty() && saoIguais(pesquisaRotaDTO.getOrigem(), origem)) {
 				rotaEncontrada = new ArrayList<Rota>();
 				rotasEncontradas.add(rotaEncontrada);
 			}
 		}
+	}
+
+	/**
+	 * Valida se o ponto esta como origem em alguma das rotas
+	 * 
+	 * @param ponto
+	 * @param rotas
+	 * @return boolean - Se a origem esta em algumas das rotas já tracadas
+	 */
+	public boolean jaPassouPeloPontoComoOrigem(String ponto, List<Rota> rotas) {
+		for (Rota rota : rotas) {
+			if (saoIguais(rota.getOrigem(), ponto)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean saoIguais(String valorA, String valorB) {
+		return valorA.equalsIgnoreCase(valorB);
 	}
 
 }

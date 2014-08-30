@@ -1,8 +1,7 @@
 package br.com.superxmart.business;
 
-import java.util.List;
-
 import br.com.superxmart.dao.RotaDAO;
+import br.com.superxmart.dto.MelhorRotaDTO;
 import br.com.superxmart.dto.PesquisaRotaDTO;
 import br.com.superxmart.entidade.Mapa;
 import br.com.superxmart.entidade.Rota;
@@ -21,7 +20,7 @@ public class RotaBO {
 		return mapa;
 	}
 
-	public List<Rota> buscarRota(PesquisaRotaDTO pesquisaRota) {
+	public MelhorRotaDTO buscarRota(PesquisaRotaDTO pesquisaRota) {
 		Mapa mapa = dao.buscarMapaPorNome(pesquisaRota.getNomeMapa());
 
 		if (mapa == null) {
@@ -29,8 +28,6 @@ public class RotaBO {
 			throw new RuntimeException("Nao foi possivel encontrar o mapa com o nome " + pesquisaRota.getNomeMapa());
 		}
 
-		List<Rota> melhorRota = new MelhorRota(pesquisaRota, mapa).testar();
-
-		return melhorRota;
+		return new MelhorRota(pesquisaRota, mapa).encontrarMelhorRota();
 	}
 }

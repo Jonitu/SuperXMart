@@ -14,10 +14,10 @@
     <part name="return" type="tns:mapa"/>
   </message>
   <message name="pesquisarRota">
-    <part name="mapa" type="tns:mapa"/>
+    <part name="pesquisaDeRota" type="tns:pesquisaRotaDTO"/>
   </message>
   <message name="pesquisarRotaResponse">
-    <part name="resultado" type="xsd:string"/>
+    <part name="melhorRota" type="tns:melhorRotaDTO"/>
   </message>
   <portType name="RotaWebService">
     <operation name="cadastrarRota">
@@ -58,47 +58,44 @@
 </definitions>]]></con:content><con:type>http://schemas.xmlsoap.org/wsdl/</con:type></con:part><con:part><con:url>http://localhost:8080/service-web-1.0.0-SNAPSHOT/Rota?xsd=1</con:url><con:content><![CDATA[<!--Published by JAX-WS RI at http://jax-ws.dev.java.net. RI's version is JAX-WS RI 2.1.3-b02-.-->
 <xs:schema version="1.0" targetNamespace="http://ws.superxmart.com.br/" xmlns:tns="http://ws.superxmart.com.br/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:complexType name="mapa">
+    <xs:complexContent>
+      <xs:extension base="tns:entidade">
+        <xs:sequence>
+          <xs:element name="nome" type="xs:string" minOccurs="0"/>
+          <xs:element name="rotas" type="tns:rota" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="entidade" abstract="true">
     <xs:sequence>
       <xs:element name="id" type="xs:long" minOccurs="0"/>
-      <xs:element name="nome" type="xs:string" minOccurs="0"/>
-      <xs:element name="rotas" type="tns:rota" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="rota">
+    <xs:complexContent>
+      <xs:extension base="tns:entidade">
+        <xs:sequence>
+          <xs:element name="destino" type="xs:string" minOccurs="0"/>
+          <xs:element name="distancia" type="xs:int" minOccurs="0"/>
+          <xs:element name="origem" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="pesquisaRotaDTO">
     <xs:sequence>
+      <xs:element name="autonomiaVeiculo" type="xs:int" minOccurs="0"/>
       <xs:element name="destino" type="xs:string" minOccurs="0"/>
-      <xs:element name="distancia" type="xs:int" minOccurs="0"/>
-      <xs:element name="id" type="xs:long" minOccurs="0"/>
-      <xs:element name="mapa" type="tns:mapa" minOccurs="0"/>
+      <xs:element name="nomeMapa" type="xs:string" minOccurs="0"/>
       <xs:element name="origem" type="xs:string" minOccurs="0"/>
+      <xs:element name="valorLitroCombustivel" type="xs:decimal" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
-</xs:schema>]]></con:content><con:type>http://www.w3.org/2001/XMLSchema</con:type></con:part></con:definitionCache><con:endpoints><con:endpoint>http://localhost:8080/service-web-1.0.0-SNAPSHOT/Rota</con:endpoint><con:endpoint>http://localhost:8080/service-web-1.0.0-SNAPSHOT/TesteWebService</con:endpoint></con:endpoints><con:operation isOneWay="false" action="" name="cadastrarRota" bindingOperationName="cadastrarRota" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/service-web-1.0.0-SNAPSHOT/Rota</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.superxmart.com.br/">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <ws:cadastrarRota>
-         <mapa>
-            <nome>Jonitu1</nome>
-            <!--Zero or more repetitions:-->
-            <rotas>
-               <destino>B</destino>
-               <distancia>10</distancia>
-               <origem>A</origem>
-            </rotas>
-            <rotas>
-               <destino>C</destino>
-               <distancia>10</distancia>
-               <origem>A</origem>
-            </rotas>
-            <rotas>
-               <destino>C</destino>
-               <distancia>10</distancia>
-               <origem>B</origem>
-            </rotas>
-         </mapa>
-      </ws:cadastrarRota>
-   </soapenv:Body>
-</soapenv:Envelope>]]></con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://ws.superxmart.com.br/RotaWebService/cadastrarRota"/><con:wsrmConfig version="1.2"/></con:call><con:call name="SuperXMart"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/service-web-1.0.0-SNAPSHOT/Rota</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.superxmart.com.br/">
+  <xs:complexType name="melhorRotaDTO">
+    <xs:sequence/>
+  </xs:complexType>
+</xs:schema>]]></con:content><con:type>http://www.w3.org/2001/XMLSchema</con:type></con:part></con:definitionCache><con:endpoints><con:endpoint>http://localhost:8080/service-web-1.0.0-SNAPSHOT/Rota</con:endpoint><con:endpoint>http://localhost:8080/service-web-1.0.0-SNAPSHOT/TesteWebService</con:endpoint></con:endpoints><con:operation isOneWay="false" action="" name="cadastrarRota" bindingOperationName="cadastrarRota" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="SuperXMart"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/service-web-1.0.0-SNAPSHOT/Rota</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.superxmart.com.br/">
    <soapenv:Header/>
    <soapenv:Body>
       <ws:cadastrarRota>
@@ -137,29 +134,69 @@
          </mapa>
       </ws:cadastrarRota>
    </soapenv:Body>
-</soapenv:Envelope>]]></con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://ws.superxmart.com.br/RotaWebService/cadastrarRotaRequest"/><con:wsrmConfig version="1.2"/></con:call></con:operation><con:operation isOneWay="false" action="" name="pesquisarRota" bindingOperationName="pesquisarRota" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/service-web-1.0.0-SNAPSHOT/Rota</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.superxmart.com.br/">
+</soapenv:Envelope>]]></con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://ws.superxmart.com.br/RotaWebService/cadastrarRotaRequest"/><con:wsrmConfig version="1.2"/></con:call><con:call name="Carga Inicial do Teste"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/service-web-1.0.0-SNAPSHOT/Rota</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.superxmart.com.br/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ws:cadastrarRota>
+         <mapa>
+            <nome>SP</nome>
+            <rotas>
+               <origem>A</origem>
+               <destino>B</destino>
+               <distancia>10</distancia>
+            </rotas>
+            <rotas>
+               <origem>B</origem>
+               <destino>D</destino>
+               <distancia>15</distancia>
+            </rotas>
+            <rotas>
+               <origem>A</origem>
+               <destino>C</destino>
+               <distancia>20</distancia>
+            </rotas>
+            <rotas>
+               <origem>C</origem>
+               <destino>D</destino>
+               <distancia>30</distancia>
+            </rotas>
+            <rotas>
+               <origem>B</origem>
+               <destino>E</destino>
+               <distancia>50</distancia>
+            </rotas>
+            <rotas>
+               <origem>D</origem>
+               <destino>E</destino>
+               <distancia>30</distancia>
+            </rotas>
+         </mapa>
+      </ws:cadastrarRota>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://ws.superxmart.com.br/RotaWebService/cadastrarRotaRequest"/><con:wsrmConfig version="1.2"/></con:call></con:operation><con:operation isOneWay="false" action="" name="pesquisarRota" bindingOperationName="pesquisarRota" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 2"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/service-web-1.0.0-SNAPSHOT/Rota</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.superxmart.com.br/">
    <soapenv:Header/>
    <soapenv:Body>
       <ws:pesquisarRota>
-         <mapa>
-            <!--Optional:-->
-            <id>?</id>
-            <!--Optional:-->
-            <nome>?</nome>
-            <!--Zero or more repetitions:-->
-            <rotas>
-               <!--Optional:-->
-               <destino>?</destino>
-               <!--Optional:-->
-               <distancia>?</distancia>
-               <!--Optional:-->
-               <id>?</id>
-               <!--Optional:-->
-               <mapa/>
-               <!--Optional:-->
-               <origem>?</origem>
-            </rotas>
-         </mapa>
+         <pesquisaDeRota>
+            <autonomiaVeiculo>10</autonomiaVeiculo>
+            <destino>D</destino>
+            <nomeMapa>SP</nomeMapa>
+            <origem>A</origem>
+            <valorLitroCombustivel>2.5</valorLitroCombustivel>
+         </pesquisaDeRota>
       </ws:pesquisarRota>
    </soapenv:Body>
-</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://ws.superxmart.com.br/RotaWebService/pesquisarRotaRequest"/></con:call></con:operation></con:interface><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/></con:soapui-project>
+</soapenv:Envelope>]]></con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://ws.superxmart.com.br/RotaWebService/pesquisarRotaRequest"/><con:wsrmConfig version="1.2"/></con:call></con:operation></con:interface><con:testSuite name="TestSuite 1"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TestCase 1" searchProperties="true"><con:settings/><con:testStep type="request" name="pesquisarRota - Request 2"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>RotaWebServicePortBinding</con:interface><con:operation>pesquisarRota</con:operation><con:request name="pesquisarRota - Request 2" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType=""><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/service-web-1.0.0-SNAPSHOT/Rota</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.superxmart.com.br/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ws:pesquisarRota>
+         <pesquisaDeRota>
+            <autonomiaVeiculo>10</autonomiaVeiculo>
+            <destino>D</destino>
+            <nomeMapa>SP</nomeMapa>
+            <origem>A</origem>
+            <valorLitroCombustivel>2.5</valorLitroCombustivel>
+         </pesquisaDeRota>
+      </ws:pesquisarRota>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response"/><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://ws.superxmart.com.br/RotaWebService/pesquisarRotaRequest"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:loadTest name="LoadTest 1"><con:settings><con:setting id="HttpSettings@close-connections">false</con:setting></con:settings><con:threadCount>100</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>60</con:testLimit><con:limitType>TIME</con:limitType><con:loadStrategy><con:type>Variance</con:type><con:config><interval>60000</interval><variance>0.5</variance></con:config></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval></con:loadTest><con:properties/></con:testCase><con:properties/></con:testSuite><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/></con:soapui-project>
