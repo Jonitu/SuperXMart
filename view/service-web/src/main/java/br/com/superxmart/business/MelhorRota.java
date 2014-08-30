@@ -8,6 +8,7 @@ import br.com.superxmart.dto.MelhorRotaDTO;
 import br.com.superxmart.dto.PesquisaRotaDTO;
 import br.com.superxmart.entidade.Mapa;
 import br.com.superxmart.entidade.Rota;
+import br.com.superxmart.exception.NenhumaRotaEncontradaException;
 
 /**
  * 
@@ -32,7 +33,7 @@ public class MelhorRota {
 		this.mapa = mapa;
 	}
 
-	public MelhorRotaDTO encontrarMelhorRota() {
+	public MelhorRotaDTO encontrarMelhorRota() throws NenhumaRotaEncontradaException {
 
 		procurarRotas();
 
@@ -56,6 +57,10 @@ public class MelhorRota {
 				}
 				index++;
 			}
+		}
+
+		if (melhorRotaEncontrada == null) {
+			throw new NenhumaRotaEncontradaException(pesquisaRotaDTO);
 		}
 
 		BigDecimal consumoEstimado = new BigDecimal(distanciaMenorRotaEncontrada).divide(new BigDecimal(pesquisaRotaDTO
@@ -82,62 +87,81 @@ public class MelhorRota {
 	/**
 	 * Responsavel por procurar a rota baseada nos parametros. Caso somente
 	 * encontre origem, mas com o outro destino, entao recursivamente ele metodo
-	 * irah se chamando até que encontre o destino ou acabe as possibilidades
+	 * irah se chamando ate que encontre o destino ou acabe as possibilidades
 	 * 
 	 * Este metodo encontra todos os caminhos baseado na origem, independente do
 	 * destino
 	 * 
-	 * @param rotaEncontrada
+	 * @param rotaDeEntrada
 	 * @param origem
 	 * @param destino
 	 * @param rotas
 	 */
-	private void procurarProximaRota(List<Rota> rotaEncontrada, String origem, String destino, List<Rota> rotas) {
+	private void procurarProximaRota(List<Rota> rotaDeEntrada, String origem, String destino, List<Rota> rotas) {
 		// Valida se a origem jah passou por alguma rota, entao deve ser
 		// disconsiderado, para nao gear looping infinito de rotas
-		if (jaPassouPeloPontoComoOrigem(origem, rotaEncontrada)) {
+		if (jaPassouPeloPontoComoOrigem(origem, rotaDeEntrada)) {
 			return;
 		}
 
-		List<Rota> rotaEncontradaCopy = new ArrayList<Rota>(rotaEncontrada);
+		// Cria uma copia do ponto atual da lista de Rotas, pois se surger mais
+		// de uma rota, deve-se usar a lista como entrou
+		List<Rota> rotaEncontradaCopia = new ArrayList<Rota>(rotaDeEntrada);
 
 		// flag que controla se foi encontrada alguma rota para este looping.
 		// Isto eh necessario pois se encontrar mais de uma rota para o Loop,
-		// então deve se gerar uma nova lista de rotas
+		// entao deve se gerar uma nova lista de rotas
 		boolean encontradaRotaNesteLoop = false;
 
 		for (Rota rota : rotas) {
 
 			// Valida origem e destino com a rota
 			if (saoIguais(rota.getOrigem(), origem) && saoIguais(rota.getDestino(), destino)) {
-				List<Rota> novaRota = rotaEncontrada;
-				if (encontradaRotaNesteLoop) {
-					new ArrayList<Rota>(rotaEncontradaCopy);
-					rotasEncontradas.add(novaRota);
-				}
+
+				List<Rota> novaRota = criarNovaRota(encontradaRotaNesteLoop, rotaDeEntrada, rotaEncontradaCopia);
+
 				novaRota.add(rota);
 
 				encontradaRotaNesteLoop = true;
 
 				// Valida a origem com a origem da rota
 			} else if (saoIguais(rota.getOrigem(), origem)) {
-				List<Rota> novaRota = rotaEncontrada;
-				if (encontradaRotaNesteLoop) {
-					novaRota = new ArrayList<Rota>(rotaEncontradaCopy);
-					rotasEncontradas.add(novaRota);
-				}
+				List<Rota> novaRota = criarNovaRota(encontradaRotaNesteLoop, rotaDeEntrada, rotaEncontradaCopia);
 
 				novaRota.add(rota);
 
 				encontradaRotaNesteLoop = true;
+
+				// Segue para a proxima rota, pois o destino nao foi encontrado
+				// ainda
 				procurarProximaRota(novaRota, rota.getDestino(), destino, rotas);
 			}
 
-			if (!rotaEncontrada.isEmpty() && saoIguais(pesquisaRotaDTO.getOrigem(), origem)) {
-				rotaEncontrada = new ArrayList<Rota>();
-				rotasEncontradas.add(rotaEncontrada);
+			// Necessario criar uma nova lista para cada origem igual encontrada
+			// no loop inicial
+			if (!rotaDeEntrada.isEmpty() && saoIguais(pesquisaRotaDTO.getOrigem(), origem)) {
+				rotaDeEntrada = new ArrayList<Rota>();
+				rotasEncontradas.add(rotaDeEntrada);
 			}
 		}
+	}
+
+	/**
+	 * Metodo que verifica se deve ser criada uma nova lista de rotas ou se deve
+	 * permanecer na mesma lista
+	 * 
+	 * @param encontradaRotaNesteLoop
+	 * @param rotaDeEntrada
+	 * @param rotaEncontradaCopia
+	 * @return lista que rotas
+	 */
+	private List<Rota> criarNovaRota(boolean encontradaRotaNesteLoop, List<Rota> rotaDeEntrada, List<Rota> rotaEncontradaCopia) {
+		if (encontradaRotaNesteLoop) {
+			List<Rota> novaRota = new ArrayList<Rota>(rotaEncontradaCopia);
+			rotasEncontradas.add(novaRota);
+			return novaRota;
+		}
+		return rotaDeEntrada;
 	}
 
 	/**
@@ -145,7 +169,7 @@ public class MelhorRota {
 	 * 
 	 * @param ponto
 	 * @param rotas
-	 * @return boolean - Se a origem esta em algumas das rotas já tracadas
+	 * @return boolean - Se a origem esta em algumas das rotas ja tracadas
 	 */
 	public boolean jaPassouPeloPontoComoOrigem(String ponto, List<Rota> rotas) {
 		for (Rota rota : rotas) {

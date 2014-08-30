@@ -5,12 +5,12 @@ import br.com.superxmart.dto.MelhorRotaDTO;
 import br.com.superxmart.dto.PesquisaRotaDTO;
 import br.com.superxmart.entidade.Mapa;
 import br.com.superxmart.entidade.Rota;
+import br.com.superxmart.exception.MapaNaoEncontradoException;
+import br.com.superxmart.exception.NenhumaRotaEncontradaException;
 
 public class RotaBO {
 
 	private RotaDAO dao = new RotaDAO();
-
-	private static final String MELHOR_ROTA = "Rota {0} com custo de {1}.";
 
 	public Mapa cadastrarRota(Mapa pMapa) {
 		for (Rota rota : pMapa.getRotas()) {
@@ -20,12 +20,11 @@ public class RotaBO {
 		return mapa;
 	}
 
-	public MelhorRotaDTO buscarRota(PesquisaRotaDTO pesquisaRota) {
+	public MelhorRotaDTO buscarRota(PesquisaRotaDTO pesquisaRota) throws MapaNaoEncontradoException, NenhumaRotaEncontradaException {
 		Mapa mapa = dao.buscarMapaPorNome(pesquisaRota.getNomeMapa());
 
 		if (mapa == null) {
-			// TODO : CRIAR EXCEPTION
-			throw new RuntimeException("Nao foi possivel encontrar o mapa com o nome " + pesquisaRota.getNomeMapa());
+			throw new MapaNaoEncontradoException(pesquisaRota.getNomeMapa());
 		}
 
 		return new MelhorRota(pesquisaRota, mapa).encontrarMelhorRota();

@@ -193,7 +193,7 @@
          <pesquisaDeRota>
             <autonomiaVeiculo>10</autonomiaVeiculo>
             <destino>D</destino>
-            <nomeMapa>SP</nomeMapa>
+            <nomeMapa>SP1</nomeMapa>
             <origem>A</origem>
             <valorLitroCombustivel>2.5</valorLitroCombustivel>
          </pesquisaDeRota>

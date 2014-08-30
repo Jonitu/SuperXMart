@@ -9,11 +9,12 @@ import br.com.superxmart.dto.MelhorRotaDTO;
 import br.com.superxmart.dto.PesquisaRotaDTO;
 import br.com.superxmart.entidade.Mapa;
 import br.com.superxmart.entidade.Rota;
+import br.com.superxmart.exception.NenhumaRotaEncontradaException;
 
 public class MelhorRotaTest {
 
 	@Test
-	public void testeEncontrarMelhorRotaAvaliacaoTecnica() {
+	public void testeEncontrarMelhorRotaAvaliacaoTecnica() throws NenhumaRotaEncontradaException {
 		PesquisaRotaDTO pesquisaRotaDTO = criarPesquisaRotaDTO();
 
 		MelhorRotaDTO melhorRotaDTO = new MelhorRota(pesquisaRotaDTO, getMapaPadrao()).encontrarMelhorRota();
@@ -22,7 +23,7 @@ public class MelhorRotaTest {
 	}
 
 	@Test
-	public void testeEncontrarMelhorRotaIgnorandoLooping() {
+	public void testeEncontrarMelhorRotaIgnorandoLooping() throws NenhumaRotaEncontradaException {
 		PesquisaRotaDTO pesquisaRotaDTO = criarPesquisaRotaDTO();
 
 		Mapa mapa = getMapaPadrao();
@@ -34,7 +35,7 @@ public class MelhorRotaTest {
 	}
 
 	@Test
-	public void testeEncontrarMelhorRotaComDistanciaMenorComMaisRotas() {
+	public void testeEncontrarMelhorRotaComDistanciaMenorComMaisRotas() throws NenhumaRotaEncontradaException {
 		PesquisaRotaDTO pesquisaRotaDTO = criarPesquisaRotaDTO();
 
 		Mapa mapa = getMapaPadrao();
@@ -47,7 +48,7 @@ public class MelhorRotaTest {
 	}
 
 	@Test
-	public void testeNaoEncontrarRota() {
+	public void testeNaoEncontrarRota() throws NenhumaRotaEncontradaException {
 
 		PesquisaRotaDTO pesquisaRotaDTO = criarPesquisaRotaDTO();
 
@@ -58,6 +59,18 @@ public class MelhorRotaTest {
 		MelhorRotaDTO melhorRotaDTO = new MelhorRota(pesquisaRotaDTO, mapa).encontrarMelhorRota();
 
 		Assert.assertEquals(melhorRotaDTO.getMelhorRota(), "Rota A B F D com custo de 3,00.");
+	}
+
+	@Test(expectedExceptions = NenhumaRotaEncontradaException.class)
+	public void testeNenhumaRotaEncontrada() throws NenhumaRotaEncontradaException {
+
+		PesquisaRotaDTO pesquisaRotaDTO = criarPesquisaRotaDTO();
+		pesquisaRotaDTO.setDestino("G");
+
+		Mapa mapa = getMapaPadrao();
+
+		new MelhorRota(pesquisaRotaDTO, mapa).encontrarMelhorRota();
+
 	}
 
 	private PesquisaRotaDTO criarPesquisaRotaDTO() {
