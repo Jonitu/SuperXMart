@@ -8,6 +8,7 @@ import org.hibernate.cfg.AnnotationConfiguration;
 
 import br.com.superxmart.entidade.Mapa;
 
+@SuppressWarnings("deprecation")
 public class RotaDAO {
 
 	private SessionFactory sessionFactory = new AnnotationConfiguration().configure().buildSessionFactory();

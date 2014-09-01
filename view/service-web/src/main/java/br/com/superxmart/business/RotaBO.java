@@ -13,11 +13,20 @@ public class RotaBO {
 	private RotaDAO dao = new RotaDAO();
 
 	public Mapa cadastrarRota(Mapa pMapa) {
-		for (Rota rota : pMapa.getRotas()) {
-			rota.setMapa(pMapa);
+		Mapa mapa = dao.buscarMapaPorNome(pMapa.getNome());
+
+		if (mapa != null) {
+			for (Rota rota : pMapa.getRotas()) {
+				mapa.addRota(rota);
+			}
+		} else {
+			mapa = pMapa;
 		}
-		Mapa mapa = dao.salvarMapa(pMapa);
-		return mapa;
+
+		for (Rota rota : mapa.getRotas()) {
+			rota.setMapa(mapa);
+		}
+		return dao.salvarMapa(mapa);
 	}
 
 	public MelhorRotaDTO buscarRota(PesquisaRotaDTO pesquisaRota) throws MapaNaoEncontradoException, NenhumaRotaEncontradaException {
